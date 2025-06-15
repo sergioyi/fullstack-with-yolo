@@ -15,14 +15,14 @@ python -m venv .venv
 pip install -r requirements.txt --upgrade  
 ```
 
-### 4️⃣ inicie a aplicação
+### 4️⃣ localize a IA
 
-Modifique a [localização](app.py#L13) de onde está o modelo de IA
+Modifique a [localização](./flaskr/yolo.py#L20) de onde está o modelo de IA
 
 ### 5️⃣ inicie a aplicação
 
 ```bash
-python app.py
+flask --app flaskr run --debug
 ```
 ### ✅ acesse a aplicação disponível em [http://localhost:5000](http://localhost:5000).
 

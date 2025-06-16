@@ -1,4 +1,3 @@
-
 import { useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -54,13 +53,45 @@ const About = () => {
     }
   };
 
-  const handleContinue = () => {
-    if (selectedFile) {
-      navigate("/loading");
-    } else {
+  const handleUpload = async () => {
+    if (!selectedFile) {
       toast({
-        title: "Nenhum arquivo selecionado",
-        description: "Por favor, selecione um arquivo antes de continuar.",
+        title: "Erro",
+        description: "Nenhum arquivo foi selecionado.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    const formData = new FormData();
+    formData.append("image", selectedFile); // Adiciona o arquivo
+    formData.append("username", "vanessa"); // Adiciona o username fixo
+
+    try {
+      const response = await fetch("http://127.0.0.1:5000/uploadwithpdf", {
+        method: "POST",
+        body: formData,
+      });
+
+      if (!response.ok) {
+        throw new Error(`Erro ao enviar: ${response.statusText}`);
+      }
+
+      const result = await response.json();
+      console.log("Resultado:", result);
+
+      toast({
+        title: "Upload bem-sucedido",
+        description: `Arquivo enviado com sucesso: ${result.report}`,
+      });
+
+      navigate("/loading"); // Redireciona após sucesso
+    } catch (error) {
+      console.error("Erro ao fazer upload:", error);
+
+      toast({
+        title: "Erro ao enviar",
+        description: "Ocorreu um erro durante o envio do arquivo.",
         variant: "destructive",
       });
     }
@@ -77,13 +108,13 @@ const About = () => {
           <div>
             <h2 className="text-xl font-semibold text-gray-900 mb-4">Sobre</h2>
             <p className="text-gray-600 text-sm leading-relaxed">
-            Yolo AVC Analyze é sistema de apoio ao diagnóstico médico para detectar sinais de AVC em imagens de tomografia. O sistema processa as imagens em tempo real, gerando relatórios destacando possíveis áreas afetadas, auxiliando profissionais da saúde na tomada de decisão rápida e eficaz.
+              Yolo AVC Analyze é sistema de apoio ao diagnóstico médico para detectar sinais de AVC em imagens de tomografia. O sistema processa as imagens em tempo real, gerando relatórios destacando possíveis áreas afetadas, auxiliando profissionais da saúde na tomada de decisão rápida e eficaz.
             </p>
           </div>
 
           <div>
             <h3 className="text-lg font-medium text-gray-900 mb-4">Envio de arquivo</h3>
-            
+
             <div
               className={`relative border-2 border-dashed rounded-lg p-8 text-center transition-colors ${
                 isDragging
@@ -104,9 +135,9 @@ const About = () => {
                 accept=".pdf,image/*"
                 onChange={handleFileInputChange}
               />
-              
+
               <Upload className="mx-auto h-12 w-12 text-gray-400 mb-4" />
-              
+
               {selectedFile ? (
                 <div>
                   <p className="text-green-600 font-medium">{selectedFile.name}</p>
@@ -132,7 +163,7 @@ const About = () => {
               Cancel
             </Button>
             <Button
-              onClick={handleContinue}
+              onClick={handleUpload}
               disabled={!selectedFile}
               className="flex-1 bg-[#007AFF] hover:bg-[#0056CC] text-white"
             >

@@ -4,7 +4,7 @@ import cv2
 
 class Detection:
     def __init__(self):
-        self.model = YOLO(model = r"C:\study-space\python-ia\dog-detect\yolov5su.pt")
+        self.model = YOLO(model = r"C:\Users\sergi\Downloads\brain-tumor.pt")
 
     def predict(self, img, classes=[], conf=0.5):
         if classes:

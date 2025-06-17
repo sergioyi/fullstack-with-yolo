@@ -53,62 +53,94 @@ const About = () => {
     }
   };
 
-  const handleUpload = async () => {
-    if (!selectedFile) {
+const handleUpload = async () => {
+  if (!selectedFile) {
+    toast({
+      title: "Erro",
+      description: "Nenhum arquivo foi selecionado.",
+      variant: "destructive",
+    });
+    return;
+  }
+
+  const formData = new FormData();
+  formData.append("image", selectedFile); // Adiciona o arquivo
+  formData.append("username", "vanessa"); // Adiciona o username fixo
+
+  try {
+    // Envia o arquivo para o backend
+    const response = await fetch(`${(window as any).urlBackEnd}/uploadwithpdf`, {
+      method: "POST",
+      body: formData,
+    });
+
+    // Verifica se a resposta não é bem-sucedida
+    if (!response.ok) {
+      const errorData = await response.json();
       toast({
-        title: "Erro",
-        description: "Nenhum arquivo foi selecionado.",
+        title: "Erro ao enviar",
+        description: errorData.message || "Ocorreu um erro durante o envio.",
         variant: "destructive",
       });
       return;
     }
 
-    const formData = new FormData();
-    formData.append("image", selectedFile); // Adiciona o arquivo
-    formData.append("username", "vanessa"); // Adiciona o username fixo
-
-    try {
-      const response = await fetch("http://127.0.0.1:5000/uploadwithpdf", {
-        method: "POST",
-        body: formData,
-      });
-
-      if (!response.ok) {
-        throw new Error(`Erro ao enviar: ${response.statusText}`);
-      }
-
-      const result = await response.json();
-      console.log("Resultado:", result);
+    // Tenta identificar o tipo de resposta (PDF ou JSON)
+    const contentType = response.headers.get("Content-Type");
+    if (contentType && contentType.includes("application/pdf")) {
+      // Caso seja um PDF, realiza o download
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "relatorio_medico.pdf"; // Nome do arquivo baixado
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
 
       toast({
         title: "Upload bem-sucedido",
-        description: `Arquivo enviado com sucesso: ${result.report}`,
+        description: "Relatório gerado e baixado com sucesso.",
       });
-
-      navigate("/loading"); // Redireciona após sucesso
-    } catch (error) {
-      console.error("Erro ao fazer upload:", error);
-
+    } else if (contentType && contentType.includes("application/json")) {
+      // Caso seja JSON, trata como mensagem de erro ou alerta
+      const errorData = await response.json();
       toast({
-        title: "Erro ao enviar",
-        description: "Ocorreu um erro durante o envio do arquivo.",
+        title: "Resposta do servidor",
+        description: errorData.message || "Nenhum objeto detectado.",
+        //variant: "warning",
+      });
+    } else {
+      // Caso o tipo seja inesperado
+      toast({
+        title: "Erro inesperado",
+        description: "Resposta do servidor não reconhecida.",
         variant: "destructive",
       });
     }
-  };
+  } catch (error) {
+    console.error("Erro ao fazer upload:", error);
+
+    toast({
+      title: "Erro ao enviar",
+      description: "Ocorreu um erro inesperado durante o envio.",
+      variant: "destructive",
+    });
+  }
+};
+
 
   return (
     <div className="min-h-screen bg-gray-50 flex items-center justify-center px-4">
       <div className="w-full max-w-md space-y-8">
         <div className="text-center">
-          <h1 className="text-4xl font-light text-[#007AFF] mb-8">Yolo AVC Analyze</h1>
+          <h1 className="text-4xl font-light text-[#007AFF] mb-8">Reconhecimento de Tumores Cerebrais com YOLO</h1>
         </div>
 
         <div className="space-y-6">
           <div>
-            <h2 className="text-xl font-semibold text-gray-900 mb-4">Sobre</h2>
             <p className="text-gray-600 text-sm leading-relaxed">
-              Yolo AVC Analyze é sistema de apoio ao diagnóstico médico para detectar sinais de AVC em imagens de tomografia. O sistema processa as imagens em tempo real, gerando relatórios destacando possíveis áreas afetadas, auxiliando profissionais da saúde na tomada de decisão rápida e eficaz.
+              Este projeto apresenta um sistema de apoio ao diagnóstico médico, desenvolvido para detectar e classificar diferentes tipos de tumores cerebrais em imagens de tomografia computadorizada. Utilizando a arquitetura YOLO, o sistema processa as imagens em tempo real, identificando áreas possivelmente afetadas por gliomas, meningiomas, pituitários ou ausência de tumor. Além disso, gera relatórios detalhados para auxiliar profissionais da saúde na tomada de decisões rápidas e precisas.
             </p>
           </div>
 

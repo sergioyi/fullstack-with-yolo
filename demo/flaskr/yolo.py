@@ -13,14 +13,13 @@ from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, Tabl
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from reportlab.lib import colors
 import datetime
+from flask import send_file
 
 bp = Blueprint('yolo', __name__)
 
-# Carrega o modelo treinado
-model = YOLO(model = r"C:\study-space\python-ia\dog-detect\yolov5su.pt")
 
-UPLOAD_FOLDER = 'uploads'
-REPORT_FOLDER = 'reports'
+UPLOAD_FOLDER = os.path.abspath('uploads')
+REPORT_FOLDER = os.path.abspath('reports')
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 os.makedirs(REPORT_FOLDER, exist_ok=True)
 
@@ -84,7 +83,10 @@ def upload_image_with_pdf():
             report_filename = f"report_{uuid.uuid4().hex}.pdf"
             report_path = os.path.join(REPORT_FOLDER, report_filename)
             generate_medical_report(report_path, detected_class, username=username)
-            return {"detected_class": detected_class, "report": report_filename}, 200
+            print(f"PDF gerado: {report_path}")
+            # Enviar o PDF como resposta
+            return send_file(report_path, as_attachment=True, download_name=report_filename)
+
         else:
             return {"message": "Nenhum objeto detectado"}, 200
 

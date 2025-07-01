@@ -17,6 +17,7 @@ pip install -r requirements.txt --upgrade
 
 ### 4️⃣ localize a IA
 
+⚠️ Importante que execute o arquivo demo/yolo8_treino.ipynb, para gerar o Best.pt localizado em runs/train/yolov8_coco128/weights/best.pt⚠️
 Modifique a [localização](./flaskr/yolo.py#L20) de onde está o modelo de IA
 
 ### 5️⃣ inicie a aplicação
